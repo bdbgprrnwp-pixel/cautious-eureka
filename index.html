@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0878f9"><link rel="manifest" href="manifest.json">
+<title>Мой бизнес</title>
+<style>
+:root{--blue:#0878f9;--bg:#f4f7fb;--ink:#14233f;--muted:#71809a;--line:#e5ebf3;--green:#07864b;--orange:#c76a00}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:white;padding:20px 18px 14px;position:sticky;top:0;z-index:2;border-bottom:1px solid var(--line)}h1{font-size:24px;margin:0 0 5px}header p{margin:0;color:var(--muted);font-size:13px}
+main{max-width:760px;margin:auto;padding:15px 14px 90px}.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat,.panel,.item{background:white;border:1px solid var(--line);border-radius:16px;padding:14px}.stat span{display:block;color:var(--muted);font-size:12px;margin-bottom:7px}.stat strong{font-size:20px;overflow-wrap:anywhere}.green{color:var(--green)}.blue{color:var(--blue)}
+h2{font-size:18px;margin:22px 2px 12px}.actions{display:flex;gap:8px;margin-top:14px}.btn{border:0;border-radius:12px;background:var(--blue);color:white;padding:13px 15px;font-size:15px;font-weight:650;cursor:pointer}.btn.secondary{background:#eaf2ff;color:var(--blue)}.btn.danger{background:#fff0f0;color:#c62828}.actions .btn{flex:1}
+.item{margin-bottom:10px;display:flex;justify-content:space-between;gap:12px}.item h3{margin:0 0 6px;font-size:16px}.item p{margin:3px 0;color:var(--muted);font-size:13px}.profit{font-weight:750;color:var(--green);white-space:nowrap;text-align:right}.tag{display:inline-block;font-size:11px;border-radius:20px;padding:4px 8px;background:#fff0d9;color:var(--orange);margin-bottom:5px}.tag.sold{background:#ddf8e9;color:var(--green)}.tag.listed{background:#e5f0ff;color:var(--blue)}
+label{display:block;font-size:13px;color:#52627b;margin:12px 0 6px}input,select,textarea{width:100%;font:16px inherit;font-size:16px;padding:12px;border:1px solid #dbe3ef;border-radius:10px;background:#fff;color:var(--ink)}textarea{min-height:70px;resize:vertical}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.hidden{display:none!important}.form-actions{display:flex;gap:8px;margin-top:16px}.form-actions button{flex:1}.small{font-size:12px;color:var(--muted);line-height:1.45}.empty{text-align:center;padding:26px 12px;color:var(--muted);background:white;border-radius:14px}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:center;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));z-index:3}nav button{border:0;background:none;color:var(--muted);font-size:13px;padding:8px 16px;border-radius:10px}nav button.active{background:#eaf2ff;color:var(--blue);font-weight:700}
+@media(max-width:380px){.stat strong{font-size:17px}.grid{grid-template-columns:1fr}.item{padding:12px}}
+</style></head>
+<body>
+<header><h1>📦 Мой бизнес</h1><p>Учёт каждого предмета отдельно · ₽</p></header>
+<main>
+<section id="home">
+<div class="stats">
+<div class="stat"><span>Чистая прибыль</span><strong id="sProfit" class="green">0 ₽</strong></div>
+<div class="stat"><span>Вложено в товары</span><strong id="sInvest">0 ₽</strong></div>
+<div class="stat"><span>Выручка от продаж</span><strong id="sRevenue" class="blue">0 ₽</strong></div>
+<div class="stat"><span>Доп. расходы</span><strong id="sExpenses">0 ₽</strong></div>
+</div>
+<div class="actions"><button class="btn" onclick="newItem()">＋ Добавить предмет</button></div>
+<h2>Последние предметы</h2><div id="recent"></div>
+</section>
+<section id="items" class="hidden"><h2>Мои предметы</h2><div id="itemList"></div><button class="btn" onclick="newItem()" style="width:100%">＋ Добавить предмет</button></section>
+<section id="editor" class="hidden">
+<h2 id="formTitle">Добавить предмет</h2>
+<form id="itemForm">
+<input type="hidden" id="itemId">
+<label>Название предмета *</label><input id="name" required placeholder="Например, iPhone 13">
+<div class="grid">
+<div><label>Цена покупки (₽) *</label><input id="buy" type="number" min="0" step="0.01" required placeholder="20000"></div>
+<div><label>Доп. расходы (₽)</label><input id="extra" type="number" min="0" step="0.01" value="0" placeholder="500"></div>
+</div>
+<label>Цена продажи (₽)</label><input id="sale" type="number" min="0" step="0.01" placeholder="Заполни после продажи">
+<label>Статус</label><select id="status"><option value="Куплен">Куплен</option><option value="В продаже">В продаже</option><option value="Продан">Продан</option></select>
+<label>Дата покупки</label><input id="date" type="date">
+<label>Заметки (необязательно)</label><textarea id="notes" placeholder="Состояние, комплект, где куплен..."></textarea>
+<div class="panel" style="margin-top:14px"><span class="small">Расчёт по этому предмету</span><div style="display:flex;justify-content:space-between;margin-top:8px"><span>Всего вложено</span><strong id="calcInvest">0 ₽</strong></div><div style="display:flex;justify-content:space-between;margin-top:8px"><span>Прибыль</span><strong id="calcProfit">—</strong></div></div>
+<div class="form-actions"><button type="button" class="btn secondary" onclick="showTab('items')">Отмена</button><button class="btn" type="submit">Сохранить</button></div>
+<button type="button" id="deleteBtn" class="btn danger hidden" style="width:100%;margin-top:10px" onclick="deleteCurrent()">Удалить предмет</button>
+</form>
+</section>
+<section id="backup" class="hidden"><h2>Резервная копия</h2><div class="panel"><p class="small">Данные хранятся только в этом браузере на этом устройстве. Экспортируй копию, чтобы не потерять учёт.</p><div class="actions"><button class="btn" onclick="exportData()">Скачать копию</button><button class="btn secondary" onclick="document.getElementById('importFile').click()">Импортировать</button></div><input id="importFile" class="hidden" type="file" accept="application/json" onchange="importData(event)"></div></section>
+</main>
+<nav><button id="nav-home" class="active" onclick="showTab('home')">⌂ Главная</button><button id="nav-items" onclick="showTab('items')">▦ Предметы</button><button id="nav-backup" onclick="showTab('backup')">↻ Копия</button></nav>
+<script>
+const KEY='mojBiznesIndividualItemsV1'; let data=load(); let currentTab='home';
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){return []}}
+function persist(){localStorage.setItem(KEY,JSON.stringify(data));render()}
+function money(n){return (Number(n)||0).toLocaleString('ru-RU',{maximumFractionDigits:2})+' ₽'}
+function invested(x){return (+x.buy||0)+(+x.extra||0)}
+function profit(x){return (+x.sale||0)-invested(x)}
+function render(){
+ const sold=data.filter(x=>x.status==='Продан');
+ document.getElementById('sProfit').textContent=money(sold.reduce((s,x)=>s+profit(x),0));
+ document.getElementById('sInvest').textContent=money(data.filter(x=>x.status!=='Продан').reduce((s,x)=>s+invested(x),0));
+ document.getElementById('sRevenue').textContent=money(sold.reduce((s,x)=>s+(+x.sale||0),0));
+ document.getElementById('sExpenses').textContent=money(data.reduce((s,x)=>s+(+x.extra||0),0));
+ const cards=arr=>arr.length?arr.slice().reverse().map(card).join(''):'<div class="empty">Пока нет предметов. Нажми «Добавить предмет».</div>';
+ document.getElementById('recent').innerHTML=cards(data.slice(-5));
+ document.getElementById('itemList').innerHTML=cards(data);
+}
+function card(x){let p=x.status==='Продан'?money(profit(x)):'Вложено: '+money(invested(x));return `<div class="item" onclick="editItem('${x.id}')"><div><span class="tag ${x.status==='Продан'?'sold':x.status==='В продаже'?'listed':''}">${esc(x.status)}</span><h3>${esc(x.name)}</h3><p>Покупка: ${money(x.buy)} · Расходы: ${money(x.extra)}</p><p>Продажа: ${x.sale!==''&&x.sale!=null?money(x.sale):'—'}</p></div><div class="profit">${p}<p style="font-weight:400;color:#71809a">›</p></div></div>`}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function showTab(t){currentTab=t;['home','items','editor','backup'].forEach(id=>document.getElementById(id).classList.toggle('hidden',id!==t));['home','items','backup'].forEach(id=>{let b=document.getElementById('nav-'+id);if(b)b.classList.toggle('active',id===t)});if(t!=='editor')render()}
+function newItem(){document.getElementById('itemForm').reset();document.getElementById('itemId').value='';document.getElementById('extra').value='0';document.getElementById('date').value=new Date().toISOString().slice(0,10);document.getElementById('formTitle').textContent='Добавить предмет';document.getElementById('deleteBtn').classList.add('hidden');updateCalc();showTab('editor')}
+function editItem(id){const x=data.find(a=>a.id===id);if(!x)return;showTab('editor');document.getElementById('formTitle').textContent='Карточка предмета';document.getElementById('itemId').value=x.id;['name','buy','extra','sale','status','date','notes'].forEach(k=>document.getElementById(k).value=x[k]??'');document.getElementById('deleteBtn').classList.remove('hidden');updateCalc()}
+function updateCalc(){const b=+document.getElementById('buy').value||0,e=+document.getElementById('extra').value||0,s=document.getElementById('sale').value;document.getElementById('calcInvest').textContent=money(b+e);let el=document.getElementById('calcProfit');if(s!==''){let p=(+s)-b-e;el.textContent=money(p);el.style.color=p>=0?'#07864b':'#c62828'}else{el.textContent='—';el.style.color='inherit'}}
+['buy','extra','sale'].forEach(k=>document.getElementById(k).addEventListener('input',updateCalc));
+document.getElementById('itemForm').addEventListener('submit',e=>{e.preventDefault();let id=document.getElementById('itemId').value;let x={id:id||String(Date.now()),name:document.getElementById('name').value.trim(),buy:+document.getElementById('buy').value,extra:+document.getElementById('extra').value||0,sale:document.getElementById('sale').value,status:document.getElementById('status').value,date:document.getElementById('date').value,notes:document.getElementById('notes').value};if(x.status==='Продан'&&x.sale===''){alert('Укажи цену продажи для проданного предмета.');return}if(id)data=data.map(a=>a.id===id?x:a);else data.push(x);persist();showTab('items')});
+function deleteCurrent(){let id=document.getElementById('itemId').value;if(id&&confirm('Удалить этот предмет?')){data=data.filter(x=>x.id!==id);persist();showTab('items')}}
+function exportData(){let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='moj-biznes-kopia.json';a.click();URL.revokeObjectURL(url)}
+function importData(ev){let f=ev.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(!Array.isArray(d))throw Error();if(confirm('Заменить текущие данные данными из копии?')){data=d;persist();alert('Копия импортирована')}}catch(e){alert('Не удалось прочитать файл копии.')}ev.target.value=''};r.readAsText(f)}
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+render();
+</script></body></html>
